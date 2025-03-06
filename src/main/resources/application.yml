@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: QRCodeCheckIn
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+    time-zone: Asia/Ho_Chi_Minh
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/qrcode_checkin_schema}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      time-out: 300000
+
+okta:
+  oauth2:
+    issuer: ${ISSUER:https://anhbao001.us.auth0.com/}
+    audience: ${AUDIENCE:http://localhost:8080/}
+
+auth0:
+  clientId: ${AUTH0_CLIENT_ID:i5tB7Y8SBwrUQ7cUjkDWZyvIZzK7YcAQ}
+  clientSecret: ${AUTH0_CLIENT_SECRET:MK7k18zA0-c9wSJbxILzxnTMYZP5GQ476HlYsC_RtcKElnR2oBMCt6YV_0-Tn893}
+  audience: ${AUTH0_AUDIENCE:https://anhbao001.us.auth0.com/api/v2/}
+  grantType: ${AUTH0_GRANT_TYPE:client_credentials}
+  managementApi: ${AUTH0_MANAGEMENT_API:https://anhbao001.us.auth0.com/oauth/token}
+  usersApi: ${AUTH0_USER_API:https://anhbao001.us.auth0.com/api/v2/users}
+  connection: ${AUTH0_CONNECTION:Username-Password-Authentication}
+
+cors:
+  allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:5000}
+  allowedMethods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE}
+  allowedHeaders: ${CORS_ALLOWED_HEADERS:*}
+
+
+

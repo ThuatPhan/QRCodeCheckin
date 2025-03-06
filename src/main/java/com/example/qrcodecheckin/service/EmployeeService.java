@@ -1,0 +1,86 @@
+package com.example.qrcodecheckin.service;
+
+import com.example.qrcodecheckin.dto.request.EmployeeRequest;
+import com.example.qrcodecheckin.dto.response.EmployeeResponse;
+import com.example.qrcodecheckin.dto.response.PagedResponse;
+import com.example.qrcodecheckin.entity.Department;
+import com.example.qrcodecheckin.entity.Employee;
+import com.example.qrcodecheckin.exception.AppException;
+import com.example.qrcodecheckin.exception.ErrorCode;
+import com.example.qrcodecheckin.mapper.EmployeeMapper;
+import com.example.qrcodecheckin.repository.DepartmentRepository;
+import com.example.qrcodecheckin.repository.EmployeeRepository;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+
+@Service
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class EmployeeService {
+    EmployeeMapper employeeMapper;
+    EmployeeRepository employeeRepository;
+    Auth0Service auth0Service;
+    private final DepartmentRepository departmentRepository;
+
+    @Autowired
+    public EmployeeService(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository, Auth0Service auth0Service, DepartmentRepository departmentRepository) {
+        this.employeeMapper = employeeMapper;
+        this.employeeRepository = employeeRepository;
+        this.auth0Service = auth0Service;
+        this.departmentRepository = departmentRepository;
+    }
+
+    @CacheEvict(value = "employees", allEntries = true)
+    @CachePut(value = "employees", key = "#result.id")
+    public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) {
+        if (employeeRepository.existsByEmail(employeeRequest.getEmail())) {
+            throw new AppException(ErrorCode.EMPLOYEE_EMAIL_EXISTED);
+        }
+        Employee createdEmployee = employeeRepository.save(employeeMapper.toEmployee(employeeRequest));
+        //Default account username and password is email of user
+        auth0Service.createUserAccount(createdEmployee.getEmail(), createdEmployee.getEmail());
+        return employeeMapper.toResponse(createdEmployee);
+    }
+
+    @Cacheable(value = "employees", key = "#id")
+    public EmployeeResponse findEmployeeById(Long id) {
+        return employeeMapper.toResponse(employeeRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST)));
+    }
+
+    @Cacheable(value = "employees", key = "'page:' + #page + ',size:' + #size")
+    public PagedResponse<EmployeeResponse> findAll(int page, int size) {
+        Page<Employee> pageResult = employeeRepository.findAll(PageRequest.of(page - 1, size));//Page index start at 0
+        return new PagedResponse<>(pageResult.getTotalElements(), pageResult.getContent().stream().map(employeeMapper::toResponse).toList());
+    }
+
+    @CacheEvict(value = "employees", allEntries = true)
+    @CachePut(value = "employees", key = "#id")
+    public EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest) {
+        Employee employeeToUpdate = employeeRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST));
+        employeeMapper.updateEmployee(employeeToUpdate, employeeRequest);
+        if (!Objects.equals(employeeToUpdate.getDepartment().getId(), employeeRequest.getDepartmentId())) {
+            Department department = departmentRepository.findById(employeeRequest.getDepartmentId()).orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXIST));
+            employeeToUpdate.setDepartment(department);
+        }
+        employeeRepository.save(employeeToUpdate);
+        return employeeMapper.toResponse(employeeToUpdate);
+    }
+
+    @CacheEvict(value = "employees", allEntries = true)
+    public void deleteEmployee(Long id) {
+        if (employeeRepository.existsById(id)) {
+            employeeRepository.deleteById(id);
+            return;
+        }
+        throw new AppException(ErrorCode.EMPLOYEE_NOT_EXIST);
+    }
+}
