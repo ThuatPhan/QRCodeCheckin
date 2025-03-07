@@ -7,50 +7,43 @@ import com.example.qrcodecheckin.dto.response.PagedResponse;
 import com.example.qrcodecheckin.service.CheckinLocationService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/checkin-locations")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class CheckinLocationController {
     CheckinLocationService checkinLocationService;
 
-    @Autowired
-    public CheckinLocationController(CheckinLocationService checkinLocationService) {
-        this.checkinLocationService = checkinLocationService;
-    }
-
     @PostMapping
-    public ResponseEntity<ApiResponse<CheckinLocationResponse>> createCheckinLocation(@RequestBody @Valid CheckinLocationRequest checkinLocationRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<CheckinLocationResponse> createCheckinLocation(@RequestBody @Valid CheckinLocationRequest checkinLocationRequest) {
         CheckinLocationResponse createdCheckinLocation = checkinLocationService.createCheckinLocation(checkinLocationRequest);
-        return ResponseEntity.created(URI.create("/api/checkin-locations/" + createdCheckinLocation.getId())).body(new ApiResponse<>(201, null, createdCheckinLocation));
+        return ApiResponse.success(createdCheckinLocation, "Check-in location created successfully");
     }
-
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CheckinLocationResponse>> getCheckinLocationById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, checkinLocationService.findCheckinLocationById(id)));
+    public ApiResponse<CheckinLocationResponse> getCheckinLocationById(@PathVariable Long id) {
+        return ApiResponse.success(checkinLocationService.findCheckinLocationById(id), "Check-in location fetched successfully");
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PagedResponse<CheckinLocationResponse>>> getAllCheckinLocations(@RequestParam int page, @RequestParam int size) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, checkinLocationService.findAllCheckinLocations(page, size)));
+    public ApiResponse<PagedResponse<CheckinLocationResponse>> getAllCheckinLocations(@RequestParam int page, @RequestParam int size) {
+        return ApiResponse.success(checkinLocationService.findAllCheckinLocations(page, size), "All check-in locations fetched successfully");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CheckinLocationResponse>> updateCheckinLocation(@PathVariable Long id, @RequestBody @Valid CheckinLocationRequest checkinLocationRequest) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, checkinLocationService.updateCheckinLocation(id, checkinLocationRequest)));
+    public ApiResponse<CheckinLocationResponse> updateCheckinLocation(@PathVariable Long id, @RequestBody @Valid CheckinLocationRequest checkinLocationRequest) {
+        return ApiResponse.success(checkinLocationService.updateCheckinLocation(id, checkinLocationRequest), "Check-in location updated successfully");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteCheckinLocation(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCheckinLocation(@PathVariable Long id) {
         checkinLocationService.deleteCheckinLocationById(id);
-        return ResponseEntity.noContent().build();
     }
 }

@@ -20,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -28,14 +27,16 @@ import java.util.Objects;
 public class EmployeeService {
     EmployeeMapper employeeMapper;
     EmployeeRepository employeeRepository;
-    Auth0Service auth0Service;
     private final DepartmentRepository departmentRepository;
 
     @Autowired
-    public EmployeeService(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository, Auth0Service auth0Service, DepartmentRepository departmentRepository) {
+    public EmployeeService(
+            EmployeeMapper employeeMapper,
+            EmployeeRepository employeeRepository,
+            DepartmentRepository departmentRepository
+    ) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
-        this.auth0Service = auth0Service;
         this.departmentRepository = departmentRepository;
     }
 
@@ -46,29 +47,41 @@ public class EmployeeService {
             throw new AppException(ErrorCode.EMPLOYEE_EMAIL_EXISTED);
         }
         Employee createdEmployee = employeeRepository.save(employeeMapper.toEmployee(employeeRequest));
-        //Default account username and password is email of user
-        auth0Service.createUserAccount(createdEmployee.getEmail(), createdEmployee.getEmail());
         return employeeMapper.toResponse(createdEmployee);
     }
 
     @Cacheable(value = "employees", key = "#id")
     public EmployeeResponse findEmployeeById(Long id) {
-        return employeeMapper.toResponse(employeeRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST)));
+        return employeeMapper.toResponse(
+                employeeRepository
+                        .findById(id)
+                        .orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST))
+        );
     }
 
     @Cacheable(value = "employees", key = "'page:' + #page + ',size:' + #size")
     public PagedResponse<EmployeeResponse> findAll(int page, int size) {
-        Page<Employee> pageResult = employeeRepository.findAll(PageRequest.of(page - 1, size));//Page index start at 0
-        return new PagedResponse<>(pageResult.getTotalElements(), pageResult.getContent().stream().map(employeeMapper::toResponse).toList());
+        Page<Employee> pageResult = employeeRepository.findAll(PageRequest.of(page - 1, size));
+        return PagedResponse.<EmployeeResponse>builder()
+                .items(pageResult.getContent().stream().map(employeeMapper::toResponse).toList())
+                .totalItems(pageResult.getTotalElements())
+                .build();
     }
 
     @CacheEvict(value = "employees", allEntries = true)
     @CachePut(value = "employees", key = "#id")
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest) {
-        Employee employeeToUpdate = employeeRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST));
+        Employee employeeToUpdate = employeeRepository
+                .findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST));
+
         employeeMapper.updateEmployee(employeeToUpdate, employeeRequest);
+
         if (!Objects.equals(employeeToUpdate.getDepartment().getId(), employeeRequest.getDepartmentId())) {
-            Department department = departmentRepository.findById(employeeRequest.getDepartmentId()).orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXIST));
+            Department department = departmentRepository
+                    .findById(employeeRequest.getDepartmentId())
+                    .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXIST));
+
             employeeToUpdate.setDepartment(department);
         }
         employeeRepository.save(employeeToUpdate);

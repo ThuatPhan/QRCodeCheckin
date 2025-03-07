@@ -11,24 +11,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalException {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<?>> exceptionsHandler(Exception exception) {
-        return ResponseEntity.badRequest().body(new ApiResponse<>(ErrorCode.UNCATEGORIZED_ERROR.getCode(), ErrorCode.UNCATEGORIZED_ERROR.getMessage(), null));
+        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.UNCATEGORIZED_ERROR.getCode(), ErrorCode.UNCATEGORIZED_ERROR.getMessage()));
     }
 
     @ExceptionHandler(value = AppException.class)
     public ResponseEntity<ApiResponse<?>> appExceptionHandler(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        return ResponseEntity.badRequest().body(new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), null));
+        return ResponseEntity.badRequest().body(ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<?>> handleInvalidJson(HttpMessageNotReadableException ex) {
-        return ResponseEntity.badRequest().body(new ApiResponse<>(ErrorCode.INVALID_REQUEST.getCode(), "Invalid request body", null));
+        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.INVALID_REQUEST.getCode(), "Invalid request body"));
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> methodArgumentNotValidHandler(MethodArgumentNotValidException exception) {
         ErrorCode errorCode = ErrorCode.valueOf(exception.getFieldError().getDefaultMessage());
-        return ResponseEntity.badRequest().body(new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), null));
+        return ResponseEntity.badRequest().body(ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
     }
 
 }
