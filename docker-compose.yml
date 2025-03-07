@@ -3,36 +3,49 @@ version: '3.8'
 services:
   mysql:
     image: mysql:latest
-    container_name: qrcodecheckin-database
+    container_name: coffee-hrm-database
     restart: always
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: mydb
+      MYSQL_DATABASE: coffee-hrm
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     networks:
-      - app-network
+      - coffee-hrm-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
 
   redis:
     image: redis:latest
-    container_name: qrcodecheckin-redis
+    container_name: coffee-hrm-cache
     restart: always
     ports:
       - "6379:6379"
     networks:
-      - app-network
+      - coffee-hrm-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
 
   springboot:
     build: .
-    container_name: qrcodecheckin-backend
+    container_name: coffee-hrm-backend
     restart: always
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       TZ: Asia/Ho_Chi_Minh
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydb
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/coffee-hrm?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
       REDIS_HOST: redis
@@ -41,11 +54,11 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - app-network
+      - coffee-hrm-network
 
   react:
-    image: qrcodecheckin-react
-    container_name: qrcodecheckin-frontend
+    image: coffee-hrm-react
+    container_name: coffee-hrm-frontend
     depends_on:
       - springboot
     environment:
@@ -54,23 +67,24 @@ services:
     ports:
       - "5000:5000"
     networks:
-      - app-network
+      - coffee-hrm-network
 
   ngrok:
     image: ngrok/ngrok:latest
-    container_name: qrcodecheckin-ngrok
+    container_name: coffee-hrm-proxy
     ports:
       - "4040:4040"
     command:
       - "http"
       - "springboot:8080"
     environment:
-      - NGROK_AUTHTOKEN=2tQdy450dZJZ9NwxE6BFA7IKbPH_3mkiXEZWKhZhPYszaVSHq
+      - NGROK_AUTHTOKEN=your_ngrok_token
+      - NGROK_REGION=ap
     networks:
-      - app-network
+      - coffee-hrm-network
     depends_on:
       - springboot
 
 networks:
-  app-network:
+  coffee-hrm-network:
     driver: bridge

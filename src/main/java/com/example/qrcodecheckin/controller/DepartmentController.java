@@ -5,51 +5,46 @@ import com.example.qrcodecheckin.dto.response.ApiResponse;
 import com.example.qrcodecheckin.dto.response.DepartmentResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.example.qrcodecheckin.service.DepartmentService;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/departments")
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class DepartmentController {
     DepartmentService departmentService;
 
-    @Autowired
-    public DepartmentController(DepartmentService departmentService) {
-        this.departmentService = departmentService;
-    }
-
     @PostMapping
-    public ResponseEntity<ApiResponse<DepartmentResponse>> createDepartment(@RequestBody DepartmentRequest departmentRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<DepartmentResponse> createDepartment(@RequestBody @Valid DepartmentRequest departmentRequest) {
         DepartmentResponse createdDepartment = departmentService.createDepartment(departmentRequest);
-        return ResponseEntity.created(URI.create("/api/employees/" + createdDepartment.getId())).body(new ApiResponse<>(201, null, createdDepartment));
+        return ApiResponse.success(createdDepartment, "Department created successfully");
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<DepartmentResponse>>> findAll() {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, departmentService.findAll()));
+    public ApiResponse<List<DepartmentResponse>> findAll() {
+        return ApiResponse.success(departmentService.findAll(), "Departments retrieved successfully");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<DepartmentResponse>> findById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, departmentService.findDepartmentById(id)));
+    public ApiResponse<DepartmentResponse> findById(@PathVariable Long id) {
+        return ApiResponse.success(departmentService.findDepartmentById(id), "Department retrieved successfully");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<DepartmentResponse>> updateDepartment(@PathVariable Long id, @RequestBody @Valid DepartmentRequest departmentRequest) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, departmentService.updateDepartment(id, departmentRequest)));
+    public ApiResponse<DepartmentResponse> updateDepartment(@PathVariable Long id, @RequestBody @Valid DepartmentRequest departmentRequest) {
+        return ApiResponse.success(departmentService.updateDepartment(id, departmentRequest), "Department updated successfully");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
-        return ResponseEntity.noContent().build();
     }
-
 }

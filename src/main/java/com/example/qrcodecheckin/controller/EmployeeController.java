@@ -4,50 +4,46 @@ import com.example.qrcodecheckin.dto.request.EmployeeRequest;
 import com.example.qrcodecheckin.dto.response.ApiResponse;
 import com.example.qrcodecheckin.dto.response.EmployeeResponse;
 import com.example.qrcodecheckin.dto.response.PagedResponse;
-import com.example.qrcodecheckin.service.Auth0Service;
 import com.example.qrcodecheckin.service.EmployeeService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class EmployeeController {
-    private final EmployeeService employeeService;
-
-    @Autowired
-    public EmployeeController(EmployeeService employeeService, Auth0Service auth0Service) {
-        this.employeeService = employeeService;
-    }
+    EmployeeService employeeService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<EmployeeResponse>> createEmployee(@RequestBody @Valid EmployeeRequest employeeRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<EmployeeResponse> createEmployee(@RequestBody @Valid EmployeeRequest employeeRequest) {
         EmployeeResponse createdEmployee = employeeService.createEmployee(employeeRequest);
-        return ResponseEntity.created(URI.create("/api/employees/" + createdEmployee.getId())).body(new ApiResponse<>(201, null, createdEmployee));
+        return ApiResponse.success(createdEmployee, "Employee created successfully");
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PagedResponse<EmployeeResponse>>> getEmployees(@RequestParam int page, @RequestParam int size) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, employeeService.findAll(page, size)));
+    public ApiResponse<PagedResponse<EmployeeResponse>> getEmployees(@RequestParam int page, @RequestParam int size) {
+        return ApiResponse.success(employeeService.findAll(page, size), null);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<EmployeeResponse>> getEmployee(@PathVariable Long id) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, employeeService.findEmployeeById(id)));
+    public ApiResponse<EmployeeResponse> getEmployee(@PathVariable Long id) {
+        return ApiResponse.success(employeeService.findEmployeeById(id), null);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<EmployeeResponse>> updateEmployee(@PathVariable Long id, @RequestBody @Valid EmployeeRequest employeeRequest) {
-        return ResponseEntity.ok().body(new ApiResponse<>(200, null, employeeService.updateEmployee(id, employeeRequest)));
+    public ApiResponse<EmployeeResponse> updateEmployee(@PathVariable Long id, @RequestBody @Valid EmployeeRequest employeeRequest) {
+        return ApiResponse.success(employeeService.updateEmployee(id, employeeRequest), "Employee updated successfully");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
-        return ResponseEntity.noContent().build();
     }
 }
