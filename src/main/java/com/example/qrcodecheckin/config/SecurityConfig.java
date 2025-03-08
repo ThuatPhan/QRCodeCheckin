@@ -25,9 +25,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                request.requestMatchers(HttpMethod.POST, "/api/auth").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasAuthority("SCOPE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/users/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
                         .anyRequest().authenticated()
         );
         httpSecurity.oauth2ResourceServer(oauth2 ->

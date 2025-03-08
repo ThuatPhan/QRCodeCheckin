@@ -36,6 +36,7 @@ public class AppInitConfig {
                     roleRepository.save(Role.builder().name(RoleEnum.USER).build())
             );
 
+
             if (!userRepository.existsByUsername("admin")) {
                 userRepository.save(User
                         .builder()

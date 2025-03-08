@@ -1,6 +1,7 @@
 package com.example.qrcodecheckin.service;
 
 import com.example.qrcodecheckin.dto.request.EmployeeRequest;
+import com.example.qrcodecheckin.dto.request.UserRequest;
 import com.example.qrcodecheckin.dto.response.EmployeeResponse;
 import com.example.qrcodecheckin.dto.response.PagedResponse;
 import com.example.qrcodecheckin.entity.Department;
@@ -11,8 +12,8 @@ import com.example.qrcodecheckin.mapper.EmployeeMapper;
 import com.example.qrcodecheckin.repository.DepartmentRepository;
 import com.example.qrcodecheckin.repository.EmployeeRepository;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,21 +25,13 @@ import java.util.Objects;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class EmployeeService {
     EmployeeMapper employeeMapper;
     EmployeeRepository employeeRepository;
-    private final DepartmentRepository departmentRepository;
+    DepartmentRepository departmentRepository;
+    private final UserService userService;
 
-    @Autowired
-    public EmployeeService(
-            EmployeeMapper employeeMapper,
-            EmployeeRepository employeeRepository,
-            DepartmentRepository departmentRepository
-    ) {
-        this.employeeMapper = employeeMapper;
-        this.employeeRepository = employeeRepository;
-        this.departmentRepository = departmentRepository;
-    }
 
     @CacheEvict(value = "employees", allEntries = true)
     @CachePut(value = "employees", key = "#result.id")
@@ -46,7 +39,18 @@ public class EmployeeService {
         if (employeeRepository.existsByEmail(employeeRequest.getEmail())) {
             throw new AppException(ErrorCode.EMPLOYEE_EMAIL_EXISTED);
         }
+
         Employee createdEmployee = employeeRepository.save(employeeMapper.toEmployee(employeeRequest));
+        //Default username and password is email of employee
+        userService.createUser(
+                UserRequest.builder()
+                        .firstName(employeeRequest.getFirstName())
+                        .lastName(employeeRequest.getLastName())
+                        .username(employeeRequest.getEmail())
+                        .password(employeeRequest.getEmail())
+                        .employeeId(createdEmployee.getId())
+                        .build()
+        );
         return employeeMapper.toResponse(createdEmployee);
     }
 
