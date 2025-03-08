@@ -44,7 +44,9 @@ public enum ErrorCode {
     USERNAME_EXISTED(7004, "Username existed"),
     USERNAME_NOT_EXIST(7005, "Username not exist"),
 
-    UNAUTHENTICATED(8000, "Unauthenticated");
+    UNAUTHENTICATED(8000, "Unauthenticated"),
+    ROLE_NOT_EXIST(8001, "Role not exist"),
+    GENERATE_TOKEN_FAILED(8002, "Failed when generating token");
 
     int code;
     String message;

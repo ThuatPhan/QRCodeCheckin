@@ -1,20 +1,25 @@
 package com.example.qrcodecheckin.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
 import java.util.List;
 
 @Entity
 @Table(name = "departments")
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+
 public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(nullable = false)
-    private String name;
+    String name;
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
-    private List<Employee> employees;
+    List<Employee> employees;
 }
