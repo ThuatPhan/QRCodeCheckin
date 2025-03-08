@@ -10,7 +10,8 @@ import java.io.Serializable;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeResponse implements Serializable {
     Long id;
-    String fullName;
+    String firstName;
+    String lastName;
     String email;
     DepartmentResponse department;
 }

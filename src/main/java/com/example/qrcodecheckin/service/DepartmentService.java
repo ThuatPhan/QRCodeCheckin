@@ -2,6 +2,7 @@ package com.example.qrcodecheckin.service;
 
 import com.example.qrcodecheckin.dto.request.DepartmentRequest;
 import com.example.qrcodecheckin.dto.response.DepartmentResponse;
+import com.example.qrcodecheckin.dto.response.PagedResponse;
 import com.example.qrcodecheckin.entity.Department;
 import com.example.qrcodecheckin.exception.AppException;
 import com.example.qrcodecheckin.exception.ErrorCode;
@@ -12,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import com.example.qrcodecheckin.repository.DepartmentRepository;
-
-import java.util.List;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -44,9 +45,13 @@ public class DepartmentService {
         return departmentMapper.toResponse(departmentRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXIST)));
     }
 
-    @Cacheable(value = "departments")
-    public List<DepartmentResponse> findAll() {
-        return departmentRepository.findAll().stream().map(departmentMapper::toResponse).toList();
+    @Cacheable(value = "departments", key = "'page:' + #page + ',size:' + #size")
+    public PagedResponse<DepartmentResponse> findAll(int page, int size) {
+        Page<Department> pageResult = departmentRepository.findAll(PageRequest.of(page, size));
+        return PagedResponse.<DepartmentResponse>builder()
+                .totalItems(pageResult.getTotalElements())
+                .items(pageResult.getContent().stream().map(departmentMapper::toResponse).toList())
+                .build();
     }
 
     @CacheEvict(value = "departments", allEntries = true)

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.HashSet;
 import java.util.Set;
 
 
@@ -35,5 +34,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    Set<Role> roles = new HashSet<>();
+    Set<Role> roles;
+
+    @OneToOne
+    @JoinColumn(name = "employee_id", referencedColumnName = "id", unique = true)
+    Employee employee;
 }
