@@ -2,34 +2,37 @@ package com.example.qrcodecheckin.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 @Entity
 @Table(name = "checkin_locations")
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CheckinLocation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(nullable = false)
-    private String name;
+    String name;
 
     @Column(nullable = false)
-    private double latitude;
+    double latitude;
 
     @Column(nullable = false)
-    private double longitude;
+    double longitude;
 
     @Positive
     @Column(nullable = false)
-    private double radius;
+    double radius;
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
-    private List<CheckinQrCode> qrCodes;
+    List<CheckinQrCode> qrCodes;
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
-    private List<CheckinHistory> history;
+    List<CheckinHistory> history;
 }

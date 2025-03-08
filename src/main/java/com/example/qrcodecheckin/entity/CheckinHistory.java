@@ -1,7 +1,9 @@
 package com.example.qrcodecheckin.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -9,28 +11,29 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "checkin_histories")
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CheckinHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(nullable = false)
-    private double latitude;
+    double latitude;
 
     @Column(nullable = false)
-    private double longitude;
+    double longitude;
 
     @Column(nullable = false)
-    private boolean success;
+    boolean success;
 
     @ManyToOne
     @JoinColumn(name = "location_id", nullable = false)
-    private CheckinLocation location;
+    CheckinLocation location;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    String userId;
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime checkinTime;
+    LocalDateTime checkinTime;
 }
