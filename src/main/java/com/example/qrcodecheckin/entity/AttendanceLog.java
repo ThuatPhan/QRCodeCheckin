@@ -28,6 +28,7 @@ public class AttendanceLog {
     Shift shift;
 
     LocalDateTime checkinTime;
+
     LocalDateTime checkoutTime;
 
     @Enumerated(EnumType.STRING)
