@@ -80,7 +80,6 @@ public class AuthenticationService {
     private String buildScope(User user) {
         StringJoiner scopeJoiner = new StringJoiner(" ");
         if (user.getRoles() != null) {
-            // Create a new collection to avoid concurrent modification
             List<Role> rolesCopy = new ArrayList<>(user.getRoles());
             for (Role role : rolesCopy) {
                 if (role.getName() != null) {

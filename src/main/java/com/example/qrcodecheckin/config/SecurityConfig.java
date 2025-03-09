@@ -38,6 +38,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/qrcode/**").hasAuthority("SCOPE_ADMIN")
                         .anyRequest().authenticated()
         );
         httpSecurity.oauth2ResourceServer(oauth2 ->
