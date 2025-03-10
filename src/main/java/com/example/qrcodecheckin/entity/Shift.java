@@ -1,6 +1,5 @@
 package com.example.qrcodecheckin.entity;
 
-import com.example.qrcodecheckin.enums.EmploymentType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,8 +7,8 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalTime;
 
 @Entity
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -20,7 +19,7 @@ public class Shift {
     Long id;
 
     @Column(nullable = false)
-    String shiftName;
+    String name;
 
     @Column(nullable = false)
     LocalTime startTime;
@@ -30,8 +29,4 @@ public class Shift {
 
     @Column(nullable = false)
     Double requiredHours;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    EmploymentType employmentType;
 }

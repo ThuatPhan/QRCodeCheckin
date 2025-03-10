@@ -37,10 +37,17 @@ public class EmployeeService {
     @CachePut(value = "employees", key = "#result.id")
     public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) {
         if (employeeRepository.existsByEmail(employeeRequest.getEmail())) {
-            throw new AppException(ErrorCode.EMPLOYEE_EMAIL_EXISTED);
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
-        Employee createdEmployee = employeeRepository.save(employeeMapper.toEmployee(employeeRequest));
+        var department = departmentRepository
+                .findById(employeeRequest.getDepartmentId())
+                .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXIST));
+
+        var employee = employeeMapper.toEmployee(employeeRequest);
+        employee.setDepartment(department);
+
+        Employee createdEmployee = employeeRepository.save(employee);
         //Default username and password is email of employee
         userService.createUser(
                 UserRequest.builder()
