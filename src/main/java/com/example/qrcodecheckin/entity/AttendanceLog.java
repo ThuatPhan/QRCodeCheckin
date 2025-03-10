@@ -8,8 +8,8 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "attendance_logs")
@@ -22,10 +22,6 @@ public class AttendanceLog {
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     Employee employee;
-
-    @ManyToOne
-    @JoinColumn(name = "shift_id", nullable = false)
-    Shift shift;
 
     LocalDateTime checkinTime;
 

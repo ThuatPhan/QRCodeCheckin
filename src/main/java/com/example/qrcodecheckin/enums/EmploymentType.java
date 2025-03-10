@@ -1,6 +1,6 @@
 package com.example.qrcodecheckin.enums;
 
 public enum EmploymentType {
-    FULLTIME,
-    PARTTIME
+    FULL_TIME,
+    PART_TIME
 }

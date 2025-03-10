@@ -1,6 +1,7 @@
 package com.example.qrcodecheckin.exception;
 
 import com.example.qrcodecheckin.dto.response.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,8 +28,7 @@ public class GlobalException {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> methodArgumentNotValidHandler(MethodArgumentNotValidException exception) {
-        ErrorCode errorCode = ErrorCode.valueOf(exception.getFieldError().getDefaultMessage());
-        return ResponseEntity.badRequest().body(ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
+        return ResponseEntity.badRequest().body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), exception.getFieldError().getDefaultMessage()));
     }
 
 }

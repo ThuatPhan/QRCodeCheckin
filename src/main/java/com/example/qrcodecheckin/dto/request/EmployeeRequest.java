@@ -14,20 +14,26 @@ import java.time.LocalDate;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeRequest {
-    @Size(min = 5, message = "EMPLOYEE_FIRSTNAME_INVALID")
+    @NotNull(message = "Firstname is required")
+    @Size(min = 3, message = "First name must be at least 3 characters long")
     String firstName;
 
-    @Size(min = 5, message = "EMPLOYEE_LASTNAME_INVALID")
+    @NotNull(message = "Lastname is required")
+    @Size(min = 3, message = "Last name must be at least 3 characters long")
     String lastName;
 
-    @Past(message = "EMPLOYEE_BIRTHDAY_INVALID")
+    @NotNull(message = "Date of birth is required")
+    @Past(message = "Date of birth must be a date in the past")
     LocalDate dateOfBirth;
 
-    @Email(message = "EMPLOYEE_EMAIL_INVALID")
+    @NotNull(message = "Email is required")
+    @Email(message = "Invalid email format, please enter a valid email (example@example.com)")
     String email;
 
-    @NotNull
+    @NotNull(message = "Employment type is required")
     EmploymentType employmentType;
 
+    @NotNull(message = "Department id is required")
     Long departmentId;
 }
+

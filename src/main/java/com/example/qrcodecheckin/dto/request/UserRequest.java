@@ -1,5 +1,6 @@
 package com.example.qrcodecheckin.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,17 +11,22 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class UserRequest {
-    @Size(min = 3, message = "FIRSTNAME_INVALID")
+    @NotNull(message = "Firstname is required")
+    @Size(min = 3, message = "First name must be at least 3 characters long")
     String firstName;
 
-    @Size(min = 3, message = "LASTNAME_INVALID")
+    @NotNull(message = "Lastname is required")
+    @Size(min = 3, message = "Last name must be at least 3 characters long")
     String lastName;
 
-    @Size(min = 5, message = "USERNAME_INVALID")
+    @NotNull(message = "Username is required")
+    @Size(min = 5, message = "Username must be at least 5 characters long")
     String username;
 
-    @Size(min = 5, message = "PASSWORD_INVALID")
+    @NotNull(message = "Password is required")
+    @Size(min = 5, message = "Password must be at least 5 characters long")
     String password;
 
     Long employeeId;
 }
+
