@@ -1,6 +1,6 @@
 package com.example.qrcodecheckin.controller;
 
-import com.example.qrcodecheckin.dto.request.QRCodeRequest;
+import com.example.qrcodecheckin.dto.request.QrCodeRequest;
 import com.example.qrcodecheckin.dto.response.ApiResponse;
 import com.example.qrcodecheckin.dto.response.QRCodeResponse;
 import com.example.qrcodecheckin.service.QrCodeService;
@@ -18,7 +18,7 @@ public class QrCodeController {
     QrCodeService qrCodeService;
 
     @PostMapping
-    public ApiResponse<QRCodeResponse> generateQRCode(@RequestBody @Valid QRCodeRequest qrCodeRequest) {
+    public ApiResponse<QRCodeResponse> generateQRCode(@RequestBody @Valid QrCodeRequest qrCodeRequest) {
         return ApiResponse.success(qrCodeService.generateQRCode(qrCodeRequest), null);
     }
 }

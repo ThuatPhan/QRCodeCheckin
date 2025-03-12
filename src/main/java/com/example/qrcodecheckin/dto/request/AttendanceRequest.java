@@ -7,7 +7,10 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class QRCodeRequest {
-    @NotNull(message = "LOCATION_REQUIRED")
-    Long locationId;
+public class AttendanceRequest {
+    @NotNull(message =  "Qr code id is required")
+    Long qrCodeId;
+
+    @NotNull(message = "Nonce is required")
+    String nonce;
 }

@@ -6,8 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface QRCodeRepository extends JpaRepository<QrCode, Long> {
-    Optional<QrCode> findByNonce(String nonce);
-
+public interface QrCodeRepository extends JpaRepository<QrCode, Long> {
+    Optional<QrCode> findByIdAndNonce(Long id, String nonce);
     Optional<QrCode> findByLocation(Location location);
 }

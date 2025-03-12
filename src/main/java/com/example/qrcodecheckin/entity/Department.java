@@ -11,7 +11,6 @@ import java.util.List;
 @Table(name = "departments")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
 public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

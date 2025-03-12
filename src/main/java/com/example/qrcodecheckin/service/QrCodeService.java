@@ -1,6 +1,6 @@
 package com.example.qrcodecheckin.service;
 
-import com.example.qrcodecheckin.dto.request.QRCodeRequest;
+import com.example.qrcodecheckin.dto.request.QrCodeRequest;
 import com.example.qrcodecheckin.dto.response.QRCodeResponse;
 import com.example.qrcodecheckin.entity.Location;
 import com.example.qrcodecheckin.entity.QrCode;
@@ -8,7 +8,7 @@ import com.example.qrcodecheckin.exception.AppException;
 import com.example.qrcodecheckin.exception.ErrorCode;
 import com.example.qrcodecheckin.mapper.QrCodeMapper;
 import com.example.qrcodecheckin.repository.LocationRepository;
-import com.example.qrcodecheckin.repository.QRCodeRepository;
+import com.example.qrcodecheckin.repository.QrCodeRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,11 +25,11 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class QrCodeService {
     QrCodeMapper qrCodeMapper;
-    QRCodeRepository qrCodeRepository;
+    QrCodeRepository qrCodeRepository;
     LocationRepository locationRepository;
     SecureRandom secureRandom = new SecureRandom();
 
-    public QRCodeResponse generateQRCode(QRCodeRequest qrCodeRequest) {
+    public QRCodeResponse generateQRCode(QrCodeRequest qrCodeRequest) {
         Location location = locationRepository
                 .findById(qrCodeRequest.getLocationId())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXIST));
@@ -37,7 +37,7 @@ public class QrCodeService {
         if (existingQrCodeOpt.isPresent()) {
             QrCode existingQrCode = existingQrCodeOpt.get();
             //Existed and not expired -> update expires at
-            if(existingQrCode.getExpiresAt().isAfter(Instant.now())) {
+            if (existingQrCode.getExpiresAt().isAfter(Instant.now())) {
                 existingQrCode.setExpiresAt(Instant.now().plus(5, ChronoUnit.MINUTES));
                 qrCodeRepository.save(existingQrCode);
                 return qrCodeMapper.toResponse(existingQrCode);
@@ -52,5 +52,10 @@ public class QrCodeService {
                 .expiresAt(Instant.now().plus(5, ChronoUnit.MINUTES))
                 .build();
         return qrCodeMapper.toResponse(qrCodeRepository.save(newQrCode));
+    }
+
+    public QrCode getQrCode(Long id, String nonce) {
+        return qrCodeRepository.findByIdAndNonce(id, nonce)
+                .orElseThrow(() -> new AppException(ErrorCode.QRCODE_NOT_EXIST));
     }
 }
