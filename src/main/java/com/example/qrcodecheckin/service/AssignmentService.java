@@ -2,17 +2,23 @@ package com.example.qrcodecheckin.service;
 
 import com.example.qrcodecheckin.dto.request.AssignmentRequest;
 import com.example.qrcodecheckin.dto.response.AssignmentResponse;
+import com.example.qrcodecheckin.dto.response.PagedResponse;
 import com.example.qrcodecheckin.entity.Assignment;
+import com.example.qrcodecheckin.entity.Shift;
 import com.example.qrcodecheckin.enums.EmploymentType;
 import com.example.qrcodecheckin.exception.AppException;
 import com.example.qrcodecheckin.exception.ErrorCode;
 import com.example.qrcodecheckin.mapper.AssignmentMapper;
 import com.example.qrcodecheckin.repository.AssignmentRepository;
 import com.example.qrcodecheckin.repository.EmployeeRepository;
+import com.example.qrcodecheckin.repository.LocationRepository;
 import com.example.qrcodecheckin.repository.ShiftRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,11 +32,23 @@ public class AssignmentService {
     ShiftRepository shiftRepository;
     AssignmentRepository assignmentRepository;
     AssignmentMapper assignmentMapper;
-
+    private final LocationRepository locationRepository;
 
     public AssignmentResponse createAssignment(AssignmentRequest assignmentRequest) {
-        var employee = employeeRepository
-                .findById(assignmentRequest.getEmployeeId())
+        var assignment = validateAndPrepareAssignment(null, assignmentRequest);
+        return assignmentMapper.toResponse(assignmentRepository.save(assignment));
+    }
+
+    public AssignmentResponse updateAssignment(long assignmentId, AssignmentRequest assignmentRequest) {
+        var existingAssignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_EXIST));
+
+        var updatedAssignment = validateAndPrepareAssignment(existingAssignment, assignmentRequest);
+        return assignmentMapper.toResponse(assignmentRepository.save(updatedAssignment));
+    }
+
+    private Assignment validateAndPrepareAssignment(Assignment existingAssignment, AssignmentRequest assignmentRequest) {
+        var employee = employeeRepository.findById(assignmentRequest.getEmployeeId())
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST));
 
         if (employee.getEmploymentType().equals(EmploymentType.FULL_TIME)) {
@@ -40,26 +58,58 @@ public class AssignmentService {
         var shift = shiftRepository.findById(assignmentRequest.getShiftId())
                 .orElseThrow(() -> new AppException(ErrorCode.SHIFT_NOT_EXIST));
 
-        LocalDate today = LocalDate.now();
+        var location = locationRepository.findById(assignmentRequest.getLocationId())
+                .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXIST));
+
         LocalDate requestDate = assignmentRequest.getDate();
 
-        if (requestDate.isEqual(today) && shift.getEndTime().isBefore(LocalTime.now())) {
-            throw new AppException(ErrorCode.INVALID_ASSIGNMENT_TIME);
+        if (isPastShift(requestDate, shift)) {
+            throw new AppException(ErrorCode.SHIFT_ALREADY_PASSED);
         }
 
-        if (assignmentRequest.getDate().isEqual(LocalDate.now()) &&
-                assignmentRepository.existsByEmployeeAndDateAndShift(employee, assignmentRequest.getDate(), shift)) {
-            throw new AppException(ErrorCode.EMPLOYEE_ALREADY_ASSIGNMENT);
+        if (existingAssignment == null || !existingAssignment.getShift().getId().equals(shift.getId())) {
+            boolean isTimeOverlapping = assignmentRepository.findByEmployeeAndDate(employee, requestDate)
+                    .stream()
+                    .anyMatch(existing -> isShiftOverlapping(existing.getShift(), shift));
+
+            if (isTimeOverlapping) {
+                throw new AppException(ErrorCode.SHIFT_TIME_CONFLICT);
+            }
         }
 
-        var newAssignment = Assignment
-                .builder()
+        return Assignment.builder()
                 .employee(employee)
                 .shift(shift)
-                .date(assignmentRequest.getDate())
+                .location(location)
+                .date(requestDate)
                 .build();
-
-        return assignmentMapper.toResponse(assignmentRepository.save(newAssignment));
     }
 
+
+    public PagedResponse<AssignmentResponse> getAssignments(int page, int size) {
+        Page<Assignment> pageResult = assignmentRepository.findAll(
+                PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "date"))
+        );
+        return PagedResponse.<AssignmentResponse>builder()
+                .totalItems(pageResult.getTotalElements())
+                .items(pageResult.getContent().stream().map(assignmentMapper::toResponse).toList())
+                .build();
+    }
+
+    public void deleteAssignment(long assignmentId) {
+        var assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_EXIST));
+        assignmentRepository.delete(assignment);
+    }
+
+    private boolean isPastShift(LocalDate date, Shift shift) {
+        LocalDate today = LocalDate.now();
+        return date.isBefore(today) || (date.isEqual(today) && shift.getEndTime().isBefore(LocalTime.now()));
+    }
+
+    private boolean isShiftOverlapping(Shift existingShift, Shift newShift) {
+        return !(newShift.getEndTime().isBefore(existingShift.getStartTime()) ||
+                newShift.getStartTime().isAfter(existingShift.getEndTime()));
+    }
 }
+

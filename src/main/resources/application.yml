@@ -23,6 +23,7 @@ spring:
       time-out: 300000
 jwt:
   signerKey: GYs7ZuOv7P9SwyHE2FVVgjT+wnuNAcVAf8ksJdtoG7a8PuE9+vUcGtVX02XINr6B
+  refreshable-duration: 36000
 
 
 

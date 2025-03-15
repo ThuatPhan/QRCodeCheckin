@@ -27,6 +27,10 @@ public class Assignment {
     @JoinColumn(name = "shift_id", nullable = false)
     private Shift shift;
 
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
+
     @Column(nullable = false)
     private LocalDate date;
 }

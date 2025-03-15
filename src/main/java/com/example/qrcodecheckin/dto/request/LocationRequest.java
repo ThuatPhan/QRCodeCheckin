@@ -1,5 +1,6 @@
 package com.example.qrcodecheckin.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import org.hibernate.validator.constraints.Length;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationRequest {
     @NotNull(message = "Location name is required")
     @Length(min = 5, message = "Location name must be at least 5 characters long")

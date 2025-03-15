@@ -1,6 +1,7 @@
 package com.example.qrcodecheckin.dto.request;
 
 import com.example.qrcodecheckin.enums.EmploymentType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EmployeeRequest {
     @NotNull(message = "Firstname is required")
     @Size(min = 3, message = "First name must be at least 3 characters long")

@@ -33,12 +33,13 @@ public class QrCodeService {
         Location location = locationRepository
                 .findById(qrCodeRequest.getLocationId())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXIST));
-        Optional<QrCode> existingQrCodeOpt = qrCodeRepository.findByLocation(location);
+        Optional<QrCode> existingQrCodeOpt = qrCodeRepository.findFirstByLocationId(location.getId());
+        int EXPIRED_MINUTES = 2;
         if (existingQrCodeOpt.isPresent()) {
             QrCode existingQrCode = existingQrCodeOpt.get();
             //Existed and not expired -> update expires at
             if (existingQrCode.getExpiresAt().isAfter(Instant.now())) {
-                existingQrCode.setExpiresAt(Instant.now().plus(5, ChronoUnit.MINUTES));
+                existingQrCode.setExpiresAt(Instant.now().plus(EXPIRED_MINUTES, ChronoUnit.MINUTES));
                 qrCodeRepository.save(existingQrCode);
                 return qrCodeMapper.toResponse(existingQrCode);
             } else {
@@ -49,13 +50,8 @@ public class QrCodeService {
         QrCode newQrCode = QrCode.builder()
                 .location(location)
                 .nonce(String.format("%04d", secureRandom.nextInt(10000)))
-                .expiresAt(Instant.now().plus(5, ChronoUnit.MINUTES))
+                .expiresAt(Instant.now().plus(EXPIRED_MINUTES, ChronoUnit.MINUTES))
                 .build();
         return qrCodeMapper.toResponse(qrCodeRepository.save(newQrCode));
-    }
-
-    public QrCode getQrCode(Long id, String nonce) {
-        return qrCodeRepository.findByIdAndNonce(id, nonce)
-                .orElseThrow(() -> new AppException(ErrorCode.QRCODE_NOT_EXIST));
     }
 }

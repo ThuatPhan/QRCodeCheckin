@@ -1,13 +1,10 @@
 package com.example.qrcodecheckin.config;
 
-import com.example.qrcodecheckin.entity.Role;
-import com.example.qrcodecheckin.entity.Shift;
-import com.example.qrcodecheckin.entity.User;
+import com.example.qrcodecheckin.entity.*;
+import com.example.qrcodecheckin.enums.EmploymentType;
 import com.example.qrcodecheckin.enums.RoleEnum;
 import com.example.qrcodecheckin.enums.ShiftEnum;
-import com.example.qrcodecheckin.repository.RoleRepository;
-import com.example.qrcodecheckin.repository.ShiftRepository;
-import com.example.qrcodecheckin.repository.UserRepository;
+import com.example.qrcodecheckin.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +25,7 @@ public class ApplicationConfig {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
     ShiftRepository shiftRepository;
+    DepartmentRepository departmentRepository;
 
     @Bean
     public ApplicationRunner applicationRunner() {
@@ -57,7 +55,21 @@ public class ApplicationConfig {
                                         .build()
                         ));
             });
-
+            //Create init departments
+            var departments = Set.of(
+                    "Management",
+                    "Barista",
+                    "Service/WaitStaff",
+                    "Inventory & Supply"
+            );
+            departments.forEach(department -> {
+                departmentRepository.findByName(department)
+                        .orElseGet(() -> departmentRepository.save(
+                                Department.builder()
+                                        .name(department)
+                                        .build()
+                        ));
+            });
             //Create admin account
             if (!userRepository.existsByUsername("admin")) {
                 userRepository.save(User

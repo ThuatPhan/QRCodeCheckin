@@ -46,4 +46,17 @@ public class LocationService {
                 .items(pageResult.getContent().stream().map(locationMapper::toResponse).toList())
                 .build();
     }
+
+    public LocationResponse updateLocation(Long id, LocationRequest request) {
+        var location = locationRepository
+                .findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXIST));
+
+        location.setName(request.getName());
+        location.setLatitude(request.getLatitude());
+        location.setLongitude(request.getLongitude());
+
+        locationRepository.save(location);
+        return locationMapper.toResponse(location);
+    }
 }

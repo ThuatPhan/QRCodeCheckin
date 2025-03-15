@@ -47,7 +47,7 @@ public class DepartmentService {
 
     @Cacheable(value = "departments", key = "'page:' + #page + ',size:' + #size")
     public PagedResponse<DepartmentResponse> findAll(int page, int size) {
-        Page<Department> pageResult = departmentRepository.findAll(PageRequest.of(page, size));
+        Page<Department> pageResult = departmentRepository.findAll(PageRequest.of(page - 1, size));
         return PagedResponse.<DepartmentResponse>builder()
                 .totalItems(pageResult.getTotalElements())
                 .items(pageResult.getContent().stream().map(departmentMapper::toResponse).toList())

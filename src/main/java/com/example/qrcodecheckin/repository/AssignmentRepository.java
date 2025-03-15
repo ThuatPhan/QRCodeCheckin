@@ -15,5 +15,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     boolean existsByEmployeeAndDateAndShift(Employee employee, LocalDate date, Shift shift);
 
     List<Assignment> findByEmployeeAndDate(Employee employee, LocalDate date);
+
 }
 

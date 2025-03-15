@@ -13,8 +13,12 @@ import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -24,28 +28,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, "/api/auth").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/users/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/locations/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/qrcode/**").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/assignments/**").hasAuthority("SCOPE_ADMIN")
-                        .anyRequest().authenticated()
-        );
+        httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(request ->
+                        request.requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/users/**").hasAuthority("SCOPE_ADMIN")
+                                .requestMatchers("/api/departments/**").hasAuthority("SCOPE_ADMIN")
+                                .requestMatchers("/api/employees/**").hasAuthority("SCOPE_ADMIN")
+                                .requestMatchers("/api/locations/**").hasAuthority("SCOPE_ADMIN")
+                                .requestMatchers("/api/qrcode/**").hasAuthority("SCOPE_ADMIN")
+                                .requestMatchers("/api/shifts/**").hasAuthority("SCOPE_ADMIN")
+                                .requestMatchers("/api/assignments/**").hasAuthority("SCOPE_ADMIN")
+                                .anyRequest().authenticated()
+                );
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
         );
@@ -62,6 +57,20 @@ public class SecurityConfig {
                 .build();
 
     }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOriginPattern("*");
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
