@@ -28,7 +28,10 @@ public class Location {
     @Column(nullable = false)
     Double longitude;
 
-    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
     List<QrCode> qrCodes;
+
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Assignment> assignments;
 }
 

@@ -34,4 +34,9 @@ public class LocationController {
     public ApiResponse<PagedResponse<LocationResponse>> getLocations(@RequestParam int page, int size) {
         return ApiResponse.success(locationService.getLocations(page, size), null);
     }
+
+    @PutMapping("/{id}")
+    public ApiResponse<LocationResponse> updateLocation(@PathVariable Long id, @RequestBody @Valid LocationRequest locationRequest) {
+        return ApiResponse.success(locationService.updateLocation(id, locationRequest), null);
+    }
 }

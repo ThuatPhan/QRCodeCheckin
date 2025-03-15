@@ -5,12 +5,9 @@ services:
     image: mysql:latest
     container_name: coffee-hrm-database
     restart: always
-    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: coffee-hrm
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     networks:
@@ -45,9 +42,9 @@ services:
         condition: service_healthy
     environment:
       TZ: Asia/Ho_Chi_Minh
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/coffee-hrm?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/coffee-hrm
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
       REDIS_HOST: redis
       REDIS_PORT: 6379
       CORS_ALLOWED_ORIGINS: http://localhost:5000
@@ -78,7 +75,7 @@ services:
       - "http"
       - "springboot:8080"
     environment:
-      - NGROK_AUTHTOKEN=your_ngrok_token
+      - NGROK_AUTHTOKEN=2uGFfXF5tGRFS5hnyk52mCEupVA_78JK4hceAgJAYUiYKHDzi
       - NGROK_REGION=ap
     networks:
       - coffee-hrm-network

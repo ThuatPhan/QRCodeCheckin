@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "employees")
@@ -39,4 +40,13 @@ public class Employee {
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = false)
     Department department;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Assignment> assignments;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<AttendanceLog> attendanceLogs;
+
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.REMOVE)
+    User user;
 }

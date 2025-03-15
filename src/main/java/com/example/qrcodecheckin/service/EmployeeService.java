@@ -101,10 +101,7 @@ public class EmployeeService {
 
     @CacheEvict(value = "employees", allEntries = true)
     public void deleteEmployee(Long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            return;
-        }
-        throw new AppException(ErrorCode.EMPLOYEE_NOT_EXIST);
+        var employee = employeeRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXIST));
+        employeeRepository.delete(employee);
     }
 }

@@ -12,6 +12,7 @@ import java.time.LocalDate;
 public class AssignmentResponse {
     Long id;
     ShiftResponse shift;
+    LocationResponse location;
     EmployeeResponse employee;
     LocalDate date;
 }

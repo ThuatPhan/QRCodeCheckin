@@ -26,13 +26,18 @@ public enum ErrorCode {
     INVALID_QRCODE(400, "Qr code is not valid"),
     ALREADY_CHECKED_OUT(400, "Already checked out"),
     SHIFT_NOT_EXIST(404, "Shift not exist"),
-    EMPLOYEE_ALREADY_ASSIGNMENT(409, "Employee already assignment to this employee"),
-    INVALID_EMPLOYMENT_TYPE(400, "Can't create assign to full time employee"),
+    EMPLOYEE_ALREADY_ASSIGNED(409, "Employee already assignment to this shift"),
+    INVALID_EMPLOYMENT_TYPE(400, "Can't create assignment for full time employee"),
     NO_SHIFT_ASSIGNED_TODAY(404, "You not have assigned today shift"),
     INVALID_ASSIGNMENT_TIME(400, "Assignment time invalid"),
     NO_VALID_SHIFT_FOR_CHECKIN(400, "You do not have a valid shift to check-in at this time"),
     NO_VALID_SHIFT_FOR_CHECKOUT(400, "You do not have a valid shift to check-out at this time"),
-    INVALID_CHECKOUT_DATE(400, "Invalid checkout date"),;
+    INVALID_CHECKOUT_DATE(400, "Invalid checkout date"),
+    TOKEN_ALREADY_REVOKED(400, "Token already revoked"),
+    SHIFT_TIME_CONFLICT(409, "Shift time conflict"),
+    SHIFT_ALREADY_PASSED(400, "Shift already passed"),
+    ASSIGNMENT_NOT_EXIST(404, "Assignment not exist"),
+    INVALID_LOCATION(400, "You must be within 50 meters of the check-in location");
 
     int code;
     String message;
